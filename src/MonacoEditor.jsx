@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Editor from "@monaco-editor/react";
 import { motion } from "framer-motion";
 
@@ -9,25 +9,50 @@ const MonacoCodeRunner = () => {
   const [js, setJs] = useState("console.log('Hello World!');");
   const [srcDoc, setSrcDoc] = useState("");
   const [error, setError] = useState("");
+  const [isCorrect, setIsCorrect] = useState(null); // To track if code is correct
 
-  const runCode = () => {
-    setError("");
-    try {
-      setSrcDoc(`
-        <html>
-          <body>${html}</body>
-          <style>${css}</style>
-          <script>${js}</script>
-        </html>
-      `);
-    } catch (err) {
-      setError(err.message);
+  // Correct code for comparison
+  const correctHtml = "<h1>Welcome to the Code Playground</h1>";
+  const correctCss = "h1 { color: green; }";
+  const correctJs = "console.log('Hello World!');";
+
+  const compareCode = () => {
+    let errorMessages = [];
+    if (html !== correctHtml) {
+      errorMessages.push("HTML code does not match the correct solution.");
     }
+    if (css !== correctCss) {
+      errorMessages.push("CSS code does not match the correct solution.");
+    }
+    if (js !== correctJs) {
+      errorMessages.push("JavaScript code does not match the correct solution.");
+    }
+    return errorMessages;
   };
 
-  useEffect(() => {
-    runCode();
-  }, [html, css, js]);
+  const runCode = () => {
+    const errors = compareCode();
+    if (errors.length > 0) {
+      setError(errors.join(" "));
+      setSrcDoc(""); // Clear the output if there's an error
+      setIsCorrect(false); // Set code status to incorrect
+    } else {
+      setError(""); // Clear any previous errors
+      setIsCorrect(true); // Set code status to correct
+      try {
+        setSrcDoc(`
+          <html>
+            <body>${html}</body>
+            <style>${css}</style>
+            <script>${js}</script>
+          </html>
+        `);
+      } catch (err) {
+        setError(err.message);
+        setIsCorrect(false);
+      }
+    }
+  };
 
   const renderEditor = () => {
     switch (activeTab) {
@@ -93,17 +118,15 @@ const MonacoCodeRunner = () => {
 
       <div className="flex flex-col md:flex-row flex-grow overflow-hidden gap-4 p-5">
         <motion.div
-          className="w-full md:w-1/5 bg-white  text-black font-bold font-[poppins] backdrop-blur-lg rounded-xl shadow-lg  p-4"
+          className="w-full md:w-1/5 bg-white text-black font-bold font-[poppins] backdrop-blur-lg rounded-xl shadow-lg p-4"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <h2 className="text-lg font-semibold">Task:</h2>
           <p className="mt-2">
-            Create an HTML element with a green heading that says 'Welcome to
-            the Code Playground'.
+            Create an HTML element with a green heading that says 'Welcome to the Code Playground'.
           </p>
-         
         </motion.div>
 
         <motion.div
@@ -176,6 +199,18 @@ const MonacoCodeRunner = () => {
             <div className="bg-red-600 text-white p-4 rounded-xl shadow-lg">
               <h2 className="font-bold">Error:</h2>
               <pre className="mt-2">{error}</pre>
+            </div>
+          )}
+          {isCorrect === true && (
+            <div className="bg-green-600 text-white p-4 rounded-xl shadow-lg">
+              <h2 className="font-bold">Success!</h2>
+              <p>Your code is correct.</p>
+            </div>
+          )}
+          {isCorrect === false && !error && (
+            <div className="bg-red-600 text-white p-4 rounded-xl shadow-lg">
+              <h2 className="font-bold">Incorrect Code</h2>
+              <p>There are errors in your code. Please review and try again.</p>
             </div>
           )}
         </motion.div>
