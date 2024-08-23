@@ -11,7 +11,7 @@ const MonacoCodeRunner = () => {
   const [error, setError] = useState("");
 
   const runCode = () => {
-    setError(""); // Reset errors before running the code
+    setError("");
     try {
       setSrcDoc(`
         <html>
@@ -26,7 +26,7 @@ const MonacoCodeRunner = () => {
   };
 
   useEffect(() => {
-    runCode(); // Automatically run the code whenever it changes
+    runCode();
   }, [html, css, js]);
 
   const renderEditor = () => {
@@ -91,31 +91,27 @@ const MonacoCodeRunner = () => {
         </motion.button>
       </motion.div>
 
-      <div className="flex flex-col md:flex-row flex-grow overflow-hidden gap-4">
-        {/* Task Panel */}
+      <div className="flex flex-col md:flex-row flex-grow overflow-hidden gap-4 p-5">
         <motion.div
-          className="w-full md:w-1/5 bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-4"
+          className="w-full md:w-1/5 bg-white  text-black font-bold font-[poppins] backdrop-blur-lg rounded-xl shadow-lg  p-4"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           <h2 className="text-lg font-semibold">Task:</h2>
           <p className="mt-2">
-            Create an HTML element with a green heading that says 'Welcome to the Code Playground'.
+            Create an HTML element with a green heading that says 'Welcome to
+            the Code Playground'.
           </p>
-          <p className="mt-2">
-            Ensure that the JavaScript console logs the text 'Hello World!' without any errors.
-          </p>
+         
         </motion.div>
 
-        {/* Editor and Navigation */}
         <motion.div
           className="flex-grow flex flex-col gap-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          {/* Editor Navigation Tabs */}
           <div className="flex bg-gray-800 text-white rounded-t-lg">
             <button
               onClick={() => setActiveTab("html")}
@@ -149,7 +145,6 @@ const MonacoCodeRunner = () => {
             </button>
           </div>
 
-          {/* Code Editor */}
           <motion.div
             className="flex-grow bg-white/10 backdrop-blur-lg rounded-b-xl p-4 shadow-lg"
             initial={{ opacity: 0, y: 20 }}
@@ -160,7 +155,6 @@ const MonacoCodeRunner = () => {
           </motion.div>
         </motion.div>
 
-        {/* Output and Error Panel */}
         <motion.div
           className="w-full md:w-2/5 flex flex-col gap-4"
           initial={{ opacity: 0, x: 20 }}
