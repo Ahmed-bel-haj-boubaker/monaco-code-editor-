@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 import { motion } from "framer-motion";
 
@@ -8,16 +8,26 @@ const MonacoCodeRunner = () => {
   const [css, setCss] = useState("h1 { color: red; }");
   const [js, setJs] = useState("console.log('Hello World!');");
   const [srcDoc, setSrcDoc] = useState("");
+  const [error, setError] = useState("");
 
   const runCode = () => {
-    setSrcDoc(`
-      <html>
-        <body>${html}</body>
-        <style>${css}</style>
-        <script>${js}</script>
-      </html>
-    `);
+    setError(""); // Reset errors before running the code
+    try {
+      setSrcDoc(`
+        <html>
+          <body>${html}</body>
+          <style>${css}</style>
+          <script>${js}</script>
+        </html>
+      `);
+    } catch (err) {
+      setError(err.message);
+    }
   };
+
+  useEffect(() => {
+    runCode(); // Automatically run the code whenever it changes
+  }, [html, css, js]);
 
   const renderEditor = () => {
     switch (activeTab) {
@@ -82,68 +92,98 @@ const MonacoCodeRunner = () => {
       </motion.div>
 
       <div className="flex flex-col md:flex-row flex-grow overflow-hidden gap-4">
+        {/* Task Panel */}
         <motion.div
-          className="flex md:flex-col bg-white/10 backdrop-blur-lg rounded-xl shadow-lg md:w-1/5"
+          className="w-full md:w-1/5 bg-white/10 backdrop-blur-lg rounded-xl shadow-lg p-4"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <button
-            onClick={() => setActiveTab("html")}
-            className={`flex-1 text-center py-4 px-6 transition-all duration-300 ${
-              activeTab === "html"
-                ? "bg-gradient-to-r from-yellow-400 to-yellow-600"
-                : "hover:bg-white/20 bg-transparent"
-            } text-white font-semibold rounded-t-lg md:rounded-none md:rounded-tl-lg`}
-          >
-            HTML
-          </button>
-          <button
-            onClick={() => setActiveTab("css")}
-            className={`flex-1 text-center py-4 px-6 transition-all duration-300 ${
-              activeTab === "css"
-                ? "bg-gradient-to-r from-green-400 to-green-600"
-                : "hover:bg-white/20 bg-transparent"
-            } text-white font-semibold`}
-          >
-            CSS
-          </button>
-          <button
-            onClick={() => setActiveTab("js")}
-            className={`flex-1 text-center py-4 px-6 transition-all duration-300 ${
-              activeTab === "js"
-                ? "bg-gradient-to-r from-blue-400 to-blue-600"
-                : "hover:bg-white/20 bg-transparent"
-            } text-white font-semibold rounded-b-lg md:rounded-none md:rounded-bl-lg`}
-          >
-            JavaScript
-          </button>
+          <h2 className="text-lg font-semibold">Task:</h2>
+          <p className="mt-2">
+            Create an HTML element with a green heading that says 'Welcome to the Code Playground'.
+          </p>
+          <p className="mt-2">
+            Ensure that the JavaScript console logs the text 'Hello World!' without any errors.
+          </p>
         </motion.div>
 
+        {/* Editor and Navigation */}
         <motion.div
-          className="flex-grow p-4 bg-white/10 backdrop-blur-lg rounded-xl shadow-lg"
+          className="flex-grow flex flex-col gap-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          {renderEditor()}
+          {/* Editor Navigation Tabs */}
+          <div className="flex bg-gray-800 text-white rounded-t-lg">
+            <button
+              onClick={() => setActiveTab("html")}
+              className={`flex-1 text-center py-3 px-4 transition-all duration-300 ${
+                activeTab === "html"
+                  ? "bg-blue-600"
+                  : "hover:bg-gray-700 bg-gray-800"
+              }`}
+            >
+              HTML
+            </button>
+            <button
+              onClick={() => setActiveTab("css")}
+              className={`flex-1 text-center py-3 px-4 transition-all duration-300 ${
+                activeTab === "css"
+                  ? "bg-green-600"
+                  : "hover:bg-gray-700 bg-gray-800"
+              }`}
+            >
+              CSS
+            </button>
+            <button
+              onClick={() => setActiveTab("js")}
+              className={`flex-1 text-center py-3 px-4 transition-all duration-300 ${
+                activeTab === "js"
+                  ? "bg-yellow-600"
+                  : "hover:bg-gray-700 bg-gray-800"
+              }`}
+            >
+              JavaScript
+            </button>
+          </div>
+
+          {/* Code Editor */}
+          <motion.div
+            className="flex-grow bg-white/10 backdrop-blur-lg rounded-b-xl p-4 shadow-lg"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            {renderEditor()}
+          </motion.div>
         </motion.div>
 
+        {/* Output and Error Panel */}
         <motion.div
-          className="w-full md:w-2/5 bg-white  backdrop-blur-lg rounded-xl p-4 shadow-lg"
+          className="w-full md:w-2/5 flex flex-col gap-4"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <iframe
-            srcDoc={srcDoc}
-            title="Output"
-            sandbox="allow-scripts"
-            frameBorder="0"
-            width="100%"
-            height="100%"
-            className="rounded-xl shadow-xl"
-          />
+          <div className="bg-white backdrop-blur-lg rounded-xl p-4 shadow-lg flex-grow">
+            <iframe
+              srcDoc={srcDoc}
+              title="Output"
+              sandbox="allow-scripts"
+              frameBorder="0"
+              width="100%"
+              height="100%"
+              className="rounded-xl shadow-xl"
+            />
+          </div>
+          {error && (
+            <div className="bg-red-600 text-white p-4 rounded-xl shadow-lg">
+              <h2 className="font-bold">Error:</h2>
+              <pre className="mt-2">{error}</pre>
+            </div>
+          )}
         </motion.div>
       </div>
     </div>
